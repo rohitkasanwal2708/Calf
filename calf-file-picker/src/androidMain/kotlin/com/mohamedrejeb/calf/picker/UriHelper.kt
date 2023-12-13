@@ -23,14 +23,27 @@ internal object URIPathHelper {
                     return Environment.getExternalStorageDirectory().toString() + "/" + split[1]
                 }
 
-            } else if (isDownloadsDocument(uri)) {
-                val id = DocumentsContract.getDocumentId(uri)
-                val contentUri = ContentUris.withAppendedId(
-                    Uri.parse("content://downloads/public_downloads"),
-                    java.lang.Long.valueOf(id)
-                )
-                return getDataColumn(context, contentUri, null, null)
-            } else if (isMediaDocument(uri)) {
+            }else if (isDownloadsDocument(uri)) {
+                val id: String? = DocumentsContract.getDocumentId(uri)
+
+                if (id != null && id.startsWith("raw:")) {
+                    // Handle raw file path
+                    val filePath = id.substring(4)
+                    // Do something with the filePath...
+                    return filePath
+                } else {
+                    // Handle regular content URI
+                    val contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"),
+                        java.lang.Long.valueOf(id)
+                    )
+                    // Do something with the contentUri...
+                    return getDataColumn(context, contentUri, null, null)
+                }
+            }
+
+// Handle other cases or return a default value if necessary...
+            else if (isMediaDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":".toRegex()).toTypedArray()
                 val type = split[0]
